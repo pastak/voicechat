@@ -85,6 +85,7 @@
       playSound();
     })
     button.addEventListener('mouseup', () => {
+      if (playOnce) return;
       playing = false;
       currentSrc.stop();
     })
