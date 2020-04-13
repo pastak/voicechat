@@ -1,6 +1,8 @@
 'use strict';
 (() => {
 
+  const VERSION = '20200413-1900';
+
   const wavTitles = [
     "あ、あ、聞こえてますか？",
     "いいはなし",
@@ -16,6 +18,27 @@
     "微妙やな",
     "最悪"
   ];
+
+  let currentCacheVersion;
+
+  navigator.serviceWorker.register('/serviceworker.js')
+
+  try {
+    currentCacheVersion = localStorage.getItem('currentCacheVersion')
+    localStorage.setItem('currentCacheVersion', VERSION);
+  } catch (e) {}
+
+  if (currentCacheVersion !== VERSION) {
+    if (currentCacheVersion) caches.delete('caches at ' + currentCacheVersion);
+    caches.open('caches at ' + VERSION)
+      .then(cache => {
+        cache.addAll([
+          ...wavTitles.map(title => `/assets/wav/${encodeURIComponent(title)}.wav`),
+          '/',
+          '/assets/js/main.js'
+        ])
+      })
+  }
 
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   const audioContext = new AudioContext();
@@ -36,15 +59,6 @@
 
   wavTitles.forEach((title) => {
     const filePath = `/assets/wav/${encodeURIComponent(title)}.wav`;
-
-    // preloading
-    const preload = document.createElement('link');
-    preload.rel = 'preload';
-    preload.as = 'fetch';
-    preload.type = 'audio/x-wav';
-    preload.crossOrigin = true;
-    preload.href = filePath;
-    document.head.appendChild(preload);
 
     // create button element
     const button = document.createElement('button');
