@@ -46,15 +46,15 @@
   const buttonsFragment = document.createDocumentFragment();
 
   let gain = 1.0;
-  let playOnce = false;
+  let playOnButtonDown = false;
 
   document.getElementById('gainControl').addEventListener('input', (event) => {
     gain = +event.target.value;
     document.getElementById('gainValue').textContent = gain;
   })
 
-  document.getElementById('playOnce').addEventListener('change', (event) => {
-    playOnce = event.target.value === 'on';
+  document.getElementById('playOnButtonDown').addEventListener('change', (event) => {
+    playOnButtonDown = event.target.value === 'on';
   })
 
   wavTitles.forEach((title) => {
@@ -88,7 +88,11 @@
       })
 
       currentSrc.onended = () => {
-        if (!playOnce) playSound();
+        if (playOnButtonDown) {
+          playSound();
+        } else {
+          playing = false;
+        }
       }
 
       currentSrc.start(0);
@@ -99,9 +103,10 @@
       playSound();
     })
     button.addEventListener('mouseup', () => {
-      if (playOnce) return;
-      playing = false;
-      currentSrc.stop();
+      if (playOnButtonDown) {
+        playing = false;
+        currentSrc.stop();
+      }
     })
   })
 
