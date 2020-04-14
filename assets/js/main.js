@@ -70,14 +70,15 @@
     let playing = false;
 
     const playSound = async () => {
-      if (currentSrc) currentSrc.stop();
-      if (!playing) return currentSrc.stop();
+      if (currentSrc) currentSrc.stop(audioContext.currentTime);
+      if (!playing) return currentSrc.stop(audioContext.currentTime);
       currentSrc = audioContext.createBufferSource();
       
       const response = await fetch(filePath);
       const buffer = await response.arrayBuffer();
 
       audioContext.decodeAudioData(buffer, (decodedData) => {
+        if (!currentSrc) return;
         currentSrc.buffer = decodedData;
 
         const gainNode = audioContext.createGain();
@@ -85,17 +86,18 @@
 
         currentSrc.connect(gainNode);
         gainNode.connect(audioContext.destination);
-      })
 
-      currentSrc.onended = () => {
-        if (playOnButtonDown) {
-          playSound();
-        } else {
-          playing = false;
+        currentSrc.onended = () => {
+          if (playOnButtonDown) {
+            playSound();
+          } else {
+            playing = false;
+            currentSrc = null;
+          }
         }
-      }
-
-      currentSrc.start(0);
+  
+        currentSrc.start(0);
+      })
     }
 
     button.addEventListener('mousedown', () => {
@@ -105,7 +107,7 @@
     button.addEventListener('mouseup', () => {
       if (playOnButtonDown) {
         playing = false;
-        currentSrc.stop();
+        currentSrc.stop(audioContext.currentTime);
       }
     })
   })
