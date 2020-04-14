@@ -1,7 +1,7 @@
 'use strict';
 (() => {
 
-  const VERSION = '20200413-1900';
+  const VERSION = '20200414-1630';
 
   const wavTitles = [
     "あ、あ、聞こえてますか？",
